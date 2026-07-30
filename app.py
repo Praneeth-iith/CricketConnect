@@ -2,7 +2,6 @@ import streamlit as st
 import pickle
 import random
 import networkx as nx
-import setup_data
 
 st.set_page_config(page_title="IPL Player Path Game", page_icon="🏏", layout="centered")
 
@@ -10,7 +9,6 @@ GRAPH_FILE = "ipl_graph.pkl"
 
 @st.cache_resource
 def load_game_data():
-    setup_data.build_dataset()
     with open(GRAPH_FILE, "rb") as f:
         data = pickle.load(f)
     return data['graph'], data['match_counts']
