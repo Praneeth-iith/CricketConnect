@@ -20,18 +20,15 @@ st.markdown("""
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* Hide Streamlit default chrome */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* Background styling */
     .stApp {
         background-color: #0b0f17;
         color: #e2e8f0;
     }
 
-    /* Main Header */
     .brand-title {
         font-size: 2.2rem;
         font-weight: 800;
@@ -53,7 +50,6 @@ st.markdown("""
         letter-spacing: 0.1em;
     }
 
-    /* Cards */
     .node-card {
         background: linear-gradient(180deg, #161e2e 0%, #0f172a 100%);
         border: 1px solid #1e293b;
@@ -79,7 +75,6 @@ st.markdown("""
         letter-spacing: -0.01em;
     }
 
-    /* Connection Pillar */
     .connector {
         display: flex;
         align-items: center;
@@ -89,7 +84,6 @@ st.markdown("""
         font-size: 1.5rem;
     }
 
-    /* Status Alert Cards */
     .alert-card {
         padding: 16px 20px;
         border-radius: 10px;
@@ -117,7 +111,24 @@ st.markdown("""
         color: #f87171;
     }
 
-    /* Customizing Streamlit Controls */
+    .solution-card {
+        background: #0f172a;
+        border: 1px dashed #334155;
+        border-radius: 8px;
+        padding: 16px;
+        font-size: 0.9rem;
+        color: #94a3b8;
+        margin-top: 12px;
+        text-align: center;
+    }
+
+    .solution-path {
+        color: #60a5fa;
+        font-weight: 600;
+        font-size: 1.05rem;
+        margin-top: 8px;
+    }
+
     .stMultiSelect div[data-baseweb="select"] {
         background-color: #0f172a !important;
         border: 1px solid #334155 !important;
@@ -132,7 +143,6 @@ st.markdown("""
         transition: all 0.2s ease !important;
     }
 
-    /* Primary Button */
     div.stButton > button[kind="primary"] {
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
         color: #ffffff !important;
@@ -144,7 +154,6 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
     }
 
-    /* Secondary Button */
     div.stButton > button[kind="secondary"] {
         background-color: #1e293b !important;
         color: #94a3b8 !important;
@@ -251,7 +260,7 @@ with col_btn2:
         st.session_state.feedback = None
         st.rerun()
 
-# --- GAME LOGIC & EVALUATION ---
+# --- GAME LOGIC ---
 if submit_button:
     full_path = [st.session_state.player_a] + selected_intermediates + [st.session_state.player_b]
     
@@ -293,7 +302,22 @@ if submit_button:
                 }
                 st.session_state.game_status = "LOST"
 
-# --- DISPLAY FEEDBACK ---
+# --- FEEDBACK DISPLAY ---
 if st.session_state.feedback:
     fb = st.session_state.feedback
     st.markdown(f'<div class="alert-card alert-{fb["type"]}">{fb["message"]}</div>', unsafe_allow_html=True)
+
+# --- SOLUTION REVEAL TAB ---
+st.write("")
+st.write("")
+
+with st.expander("Optimal Solution Matrix"):
+    optimal_path = nx.shortest_path(G, st.session_state.player_a, st.session_state.player_b)
+    formatted_path = " &rarr; ".join([f"<b>{p}</b>" for p in optimal_path])
+    
+    st.markdown(f'''
+        <div class="solution-card">
+            <div>Shortest Connection Path ({len(optimal_path) - 1} Edges):</div>
+            <div class="solution-path">{formatted_path}</div>
+        </div>
+    ''', unsafe_allow_html=True)
