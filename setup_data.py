@@ -14,11 +14,25 @@ GRAPH_FILE = "ipl_graph.pkl"
 def build_dataset():
     if not os.path.exists(GRAPH_FILE):
         print("Downloading and processing IPL data...")
-        response = requests.get(DATA_URL, stream=True)
+        
+        # User-Agent header is required so Cricsheet doesn't block Streamlit Cloud
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+        
+        response = requests.get(DATA_URL, headers=headers, stream=True)
+        response.raise_for_status() # Ensure request was successful (200 OK)
+
         with open(ZIP_FILE, "wb") as f:
-            for chunk in response.iter_content(chunk_size=1024):
+            for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
+
+        # Verify zip file before extracting
+        if not zipfile.is_zipfile(ZIP_FILE):
+            if os.path.exists(ZIP_FILE):
+                os.remove(ZIP_FILE)
+            raise ValueError("Downloaded file is corrupt or invalid zip.")
 
         with zipfile.ZipFile(ZIP_FILE, 'r') as zip_ref:
             zip_ref.extractall(EXTRACT_DIR)
@@ -48,13 +62,4 @@ def build_dataset():
 
         for player, count in match_counts.items():
             if player in G:
-                G.nodes[player]['matches'] = count
-
-        with open(GRAPH_FILE, "wb") as f:
-            pickle.dump({'graph': G, 'match_counts': match_counts}, f)
-        
-        # Clean up temporary zip and extracted files
-        os.remove(ZIP_FILE)
-
-if __name__ == "__main__":
-    build_dataset()
+                G.nodes[player]['mat
